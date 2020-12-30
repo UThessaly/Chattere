@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package chattere.protocol; 
+
+message Error { 
+    int32 error = 1;
+    string error_str = 2;
+}
+
+message User { 
+    int64 id = 1;
+    string username = 2;
+}
+
+message Message { 
+    int64 author_id = 1;
+    string content = 2;
+
+    oneof message { 
+        DMTextMessage dm_message = 10;
+        ChannelTextMessage channel_message = 11;
+        BroadcastTextMessage broadcast_message = 12;    
+    }
+}
+
+message DMTextMessage { 
+    int64 recipient_id = 1;
+}
+
+message ChannelTextMessage { 
+    int64 channel_id = 1;
+}
+
+message BroadcastTextMessage { 
+    repeated int64 channel_ids = 1;
+}
+
+message Packet { 
+    // int32 status = 1;
+    reserved 1, 13, 14;
+    oneof data { 
+        AuthRequestPacket auth_request = 10;
+        AuthResponsePacket auth_response = 11;
+        OnReadyPacket on_ready = 20;
+        Error error = 12;
+        // PingRequestPacket ping_request = 13;
+        // PingResponsePacket ping_response = 14;
+        AuthRequestPacket signup_request = 15;
+        ChatPacket chat = 16;
+    }
+}
+
+message ChatPacket { 
+    int64 channel_id = 1;
+    string content = 2;
+}
+
+message AuthRequestPacket { 
+    string username = 1;
+    string password = 2;
+}
+
+message OnReadyPacket { 
+    User user = 1;
+    repeated BasicChannel channels = 10;
+}
+
+message AuthResponsePacket { 
+    User user = 1;
+}
+
+message ChatRequestPacket { 
+    oneof message { 
+        // DMTextMessage dm_message = 2;
+        ChannelTextMessage channel_message = 3;
+        BroadcastTextMessage broadcast_message = 4;    
+    }
+}
+
+message ChatResponsePacket { 
+    Message message = 1;
+}
+
+message PingRequestPacket { 
+    int64 time = 1;
+}
+ 
+message PingResponsePacket { 
+    int64 time = 1;
+}
+
+message BasicChannel { 
+    int64 id = 1;
+
+    oneof channel { 
+        TextChannel text_channel = 10;
+        DMChannel dm_channel = 11;
+        CategoryChannel category_channel = 12;
+    }
+}
+
+message TextChannel { 
+    string topic = 1;
+    string name = 2;
+    int64 parent_id = 3;
+    int32 position = 15;
+
+    reserved 'nsfw', 'rate_limit_per_user';
+
+    // bool nsfw = 5;
+    // int32 rate_limit_per_user = 10;
+    // int32 position = 15;
+
+}
+
+message DMChannel { 
+    repeated uint64 user_ids = 1;
+}
+
+message CategoryChannel { 
+    string name = 1;
+    int64 parent_id = 2;
+    int32 position = 15;
+}
+
+message PermissionOverride { 
+    string permission = 1;
+    enum OverrideType { 
+        NONE = 0;
+        ENABLE = 1;
+        DISABLE = 2;
+    }
+
+    OverrideType override = 2;
+    
+    int64 role_id = 10;
+}
