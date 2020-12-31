@@ -5,7 +5,7 @@
 
 namespace chattere::handlers::serverbound
 {
-    static auto OnAuthRequest = [](std::tuple<Server *, std::shared_ptr<net::ClientSocket>, protocol::Packet *> data) {
+    static auto OnAuthRequest = [](std::tuple<Server *, std::shared_ptr<net::ClientSocket>, std::shared_ptr<protocol::Packet>> data) {
         auto &[server, client, packet] = data;
 
         auto auth_request = packet->auth_request();
@@ -33,18 +33,18 @@ namespace chattere::handlers::serverbound
         server->GetConsoleLogger()->info(R"(    {}  User {} has logged in with user id {})", chattere::EMOJIS["smile"], auth_request.username(), user->id());
         server->AssingSocketToUser(client->GetId(), user->id());
 
-        // protocol::Packet on_ready_packet;
+        protocol::Packet on_ready_packet;
 
-        // auto on_ready = new protocol::OnReadyPacket();
+        auto on_ready = new protocol::OnReadyPacket();
 
-        // auto user_data = *user;
-        // on_ready->set_allocated_user(&user_data);
+        auto user_data = new protocol::User(*user);
+        on_ready->set_allocated_user(user_data);
 
-        // on_ready_packet.set_allocated_on_ready(on_ready);
+        on_ready_packet.set_allocated_on_ready(on_ready);
         // client->GetSocket()->Send(protocol::packet_to_buffer(&on_ready_packet));
     };
 
-    static auto OnSignupRequest = [](std::tuple<Server *, std::shared_ptr<net::ClientSocket>, protocol::Packet *> data) {
+    static auto OnSignupRequest = [](std::tuple<Server *, std::shared_ptr<net::ClientSocket>, std::shared_ptr<protocol::Packet>> data) {
         auto &[server, client, packet] = data;
         auto &database = server->GetDatabase();
 
@@ -72,7 +72,7 @@ namespace chattere::handlers::serverbound
         server->GetConsoleLogger()->info(R"(    {}  New User with id {} and username {})", chattere::EMOJIS["smile"], user->id(), user->username());
     };
 
-    static auto OnChat = [](std::tuple<Server *, std::shared_ptr<net::ClientSocket>, protocol::Packet *> data) {
+    static auto OnChat = [](std::tuple<Server *, std::shared_ptr<net::ClientSocket>, std::shared_ptr<protocol::Packet>> data) {
         auto &[server, client, packet] = data;
         auto &database = server->GetDatabase();
 

@@ -1,10 +1,5 @@
 {
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "cmake.debugConfig": {
-        "args": [
-            "tests"
-        ]
-    },
     // "C_Cpp.formatting": "vcFormat",
     "files.associations": {
         "bit": "cpp",

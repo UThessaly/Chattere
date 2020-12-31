@@ -7,10 +7,29 @@
 #include "emoji.hpp"
 #include <spdlog/spdlog.h>
 #include <future>
+#include <docopt/docopt.h>
+
+static constexpr char USAGE[] =
+    R"(Chattere Client
+    Usage:
+      client [options] HOST
+      client (-h | --help)
+      client --version
+
+    Options:
+      -h --help          Show this screen.
+      --version          Show version.
+      -p --port=<port>   Remote Port [default: 20080].
+)";
 
 int main(int argc, char const *argv[])
 {
-    chattere::net::Socket sock(chattere::net::InetSocketAddress("0.0.0.0", 25561));
+    auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, false, "Chattere Client 1.0");
+
+    const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data()));
+    const auto host = args["HOST"].asString();
+
+    chattere::net::Socket sock(chattere::net::InetSocketAddress(host, port));
 
     sock.Connect();
 
@@ -25,7 +44,7 @@ int main(int argc, char const *argv[])
 
     auto encoded = packet_to_buffer(&packet);
 
-    std::vector<std::uint8_t> buffer;
+    std::vector<std::uint8_t> buffer = {};
     sock.OnData([&](std::size_t length, std::vector<std::uint8_t> data) {
         buffer.insert(buffer.begin(), data.begin(), data.begin() + length);
     });
@@ -52,7 +71,6 @@ int main(int argc, char const *argv[])
     });
     while (true)
     {
-
         std::string msg;
         std::getline(std::cin, msg);
 

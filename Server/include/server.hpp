@@ -6,6 +6,10 @@
 #include "actions.hpp"
 #include "packet.hpp"
 #include <spdlog/spdlog.h>
+#include <mutex>
+#include <any>
+#include <deque>
+#include <future>
 
 namespace chattere
 {
@@ -22,14 +26,30 @@ namespace chattere
         void AssingSocketToUser(std::int64_t socket, std::int64_t user_Id);
         std::int64_t UserFromClient(std::int64_t client_id);
 
+        std::uint16_t GetPort();
+        std::mutex &GetGeneralMutex();
+
+        void SetProperty(std::string property, std::any value);
+
+        std::vector<std::future<void>> m_futures;
+
     private:
-        void ProcessPacket(std::shared_ptr<net::ClientSocket> client, protocol::Packet &packet);
+        std::mutex m_general_mutex;
+        std::mutex m_unprocessed_packet_mutex;
+        std::deque<std::tuple<std::shared_ptr<net::ClientSocket>, std::shared_ptr<protocol::Packet>>> m_unprocessed_packets;
+        void ProcessPacket(std::shared_ptr<net::ClientSocket> client, std::shared_ptr<protocol::Packet> packet);
+        std::map<std::string, std::any> m_settings = {{"threads", 1}};
+
+        void Multithreaded();
+        void Create2Threads();
+        void SingleThreaded();
 
         chattere::net::ServerSocket m_server;
-        Handlers<protocol::Packet::DataCase, std::tuple<Server *, std::shared_ptr<net::ClientSocket>, protocol::Packet *>> m_packet_handlers;
+        Handlers<protocol::Packet::DataCase, std::tuple<Server *, std::shared_ptr<net::ClientSocket>, std::shared_ptr<protocol::Packet>>> m_packet_handlers;
         friend decltype(m_packet_handlers);
 
         database::Database m_database;
+        std::uint16_t m_port;
         std::shared_ptr<spdlog::logger> m_console_logger;
         std::map<std::int64_t, std::int64_t> m_socket_to_user;
     };

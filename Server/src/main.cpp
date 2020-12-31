@@ -3,29 +3,43 @@
 #include "emoji.hpp"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "snowflake.hpp"
+#include <docopt/docopt.h>
+#include <cstdlib>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
+static constexpr char USAGE[] =
+R"(Chattere Server
+    Usage:
+      server [options]
+      server (-h | --help)
+      server --version
+
+    Options:
+      -h --help          Show this screen.
+      --version          Show version.
+      -p --port=<port>   Port to start the server on [default: 20080].
+      -d --db=<file>     Database path [default: ./database.db3].   
+      -t --threads=<num> How many threads to be used [default: 1].  
+)";
+
 int main(int argc, char const *argv[])
 {
-    chattere::Server server(25561);
+  
+  auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Chattere Server 1.0");
 
-    // auto user = server.GetDatabase().GetUserById(12355);
+  const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data())); 
+  const auto &db = args["--db"].asString();
+  const auto threads = args["--threads"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--threads"].asString().data()));
+  
+  chattere::Server server(port);
+  server.SetProperty("threads", threads);
 
-    // if (user)
-    // {
-    //     server.GetConsoleLogger()->info("User: {}, {}", user->username(), user->id());
-    // }
+  server.GetConsoleLogger()->info("    {}  Server started on port {}", chattere::EMOJIS["smile"], port);
+  server.Listen();
 
-    // auto channels = server.GetDatabase().GetChannels();
-
-    // for (auto &channel : channels)
-    // {
-    //     spdlog::info("{} {}", channel->id(), channel->channel_case());
-    // }
-
-    server.GetConsoleLogger()->info("    {}  Server started on port 25565", chattere::EMOJIS["smile"]);
-    // server.GetDatabase().CreateUser("One", "hello");
-    server.Listen();
-    return 0;
+  for(auto& future : server.m_futures) {
+    future.wait();
+  }
+  return 0;
 }
