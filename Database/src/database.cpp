@@ -6,30 +6,30 @@
 namespace chattere::database
 {
 
-    std::shared_ptr<protocol::BasicChannel> createCategoryChannel(const std::shared_ptr<SQLite::Database> db, const std::shared_ptr<protocol::BasicChannel> channel)
-    {
-        auto channel_id = CreateSnowflake();
-        auto category_channel = channel->category_channel();
+    // std::shared_ptr<protocol::BasicChannel> createCategoryChannel(const std::shared_ptr<SQLite::Database> db, const std::shared_ptr<protocol::BasicChannel> channel)
+    // {
+    //     auto channel_id = CreateSnowflake();
+    //     auto category_channel = channel->category_channel();
 
-        auto name = category_channel.name();
-        auto parent_id = category_channel.parent_id();
-        auto position = category_channel.position();
+    //     auto name = category_channel.name();
+    //     auto parent_id = category_channel.parent_id();
+    //     auto position = category_channel.position();
 
-        SQLite::Statement query(*db, R"(INSERT INTO channels (Id, Name, ParentId, Position, Type)
-                                                VALUES (:id, :name, :parent_id, :position, :type);
-                                )");
+    //     SQLite::Statement query(*db, R"(INSERT INTO channels (Id, Name, ParentId, Position, Type)
+    //                                             VALUES (:id, :name, :parent_id, :position, :type);
+    //                             )");
 
-        query.bind(":id", channel_id);
-        query.bind(":name", name);
-        query.bind(":parent_id", parent_id);
-        query.bind(":position", position);
-        query.bind(":type", channel->channel_case());
+    //     query.bind(":id", channel_id);
+    //     query.bind(":name", name);
+    //     query.bind(":parent_id", parent_id);
+    //     query.bind(":position", position);
+    //     query.bind(":type", channel->channel_case());
 
-        auto result = query.exec();
+    //     auto result = query.exec();
 
-        channel->set_id(channel_id);
-        return channel;
-    }
+    //     channel->set_id(channel_id);
+    //     return channel;
+    // }
 
     std::shared_ptr<protocol::BasicChannel> createTextChannel(const std::shared_ptr<SQLite::Database> db, const std::shared_ptr<protocol::BasicChannel> channel)
     {
@@ -194,20 +194,20 @@ namespace chattere::database
             channel->set_id(id);
             switch (type)
             {
-            case protocol::BasicChannel::ChannelCase::kCategoryChannel:
-            {
-                auto name = query.getColumn("Name").getString();
-                auto parent_id = static_cast<std::int64_t>(query.getColumn("ParentId").getInt64());
-                auto position = query.getColumn("Position").getInt();
+            // case protocol::BasicChannel::ChannelCase::kCategoryChannel:
+            // {
+            //     auto name = query.getColumn("Name").getString();
+            //     auto parent_id = static_cast<std::int64_t>(query.getColumn("ParentId").getInt64());
+            //     auto position = query.getColumn("Position").getInt();
 
-                auto category_channel = new protocol::CategoryChannel();
-                category_channel->set_name(name);
-                category_channel->set_parent_id(parent_id);
-                category_channel->set_position(position);
+            //     auto category_channel = new protocol::CategoryChannel();
+            //     category_channel->set_name(name);
+            //     category_channel->set_parent_id(parent_id);
+            //     category_channel->set_position(position);
 
-                channel->set_allocated_category_channel(category_channel);
-                break;
-            }
+            //     channel->set_allocated_category_channel(category_channel);
+            //     break;
+            // }
             case protocol::BasicChannel::ChannelCase::kDmChannel:
             {
                 auto receipient_1 = static_cast<std::int64_t>(query.getColumn("Recipient_1").getInt64());
@@ -265,10 +265,10 @@ namespace chattere::database
             spdlog::critical("Channel Type {} is not a valid type", channel->channel_case());
             return nullptr;
         }
-        case protocol::BasicChannel::ChannelCase::kCategoryChannel:
-        {
-            return createCategoryChannel(m_database, channel);
-        }
+        // case protocol::BasicChannel::ChannelCase::kCategoryChannel:
+        // {
+        //     return createCategoryChannel(m_database, channel);
+        // }
         case protocol::BasicChannel::ChannelCase::kTextChannel:
         {
             return createTextChannel(m_database, channel);

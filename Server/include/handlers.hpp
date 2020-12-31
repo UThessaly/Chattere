@@ -31,7 +31,9 @@ namespace chattere::handlers::serverbound
         }
 
         server->GetConsoleLogger()->info(R"(    {}  User {} has logged in with user id {})", chattere::EMOJIS["smile"], auth_request.username(), user->id());
-        server->AssingSocketToUser(client->GetId(), user->id());
+        auto user_ptr = std::make_shared<User>(server, user);
+        user_ptr->AddClientSocket(client);
+        server->AssingSocketToUser(client->GetId(), user_ptr);
 
         protocol::Packet on_ready_packet;
 
@@ -76,8 +78,7 @@ namespace chattere::handlers::serverbound
         auto &[server, client, packet] = data;
         auto &database = server->GetDatabase();
 
-        auto user_id = server->UserFromClient(client->GetId());
-        auto user = server->GetDatabase().GetUserById(user_id);
+        auto user = server->UserFromClient(client->GetId());
 
         if (!user)
         {
@@ -85,6 +86,7 @@ namespace chattere::handlers::serverbound
         }
 
         auto chat_message = packet->chat();
-        server->GetConsoleLogger()->info(R"(    {}  {}: {})", chattere::EMOJIS["speech_balloon"], user->username(), chat_message.content());
+        server->GetConsoleLogger()->info(R"(    {}  {}: {})", chattere::EMOJIS["speech_balloon"], user->GetId(), chat_message.content());
+        user->SendMessage("Welcome!");
     };
 } // namespace chattere::handlers::serverbound

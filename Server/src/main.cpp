@@ -25,13 +25,17 @@ R"(Chattere Server
 
 int main(int argc, char const *argv[])
 {
-  
+  // auto e = std::dynamic_pointer_cast<BasicEvent>(event);
+
+  // e->GetName();
+
   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Chattere Server 1.0");
 
   const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data())); 
   const auto &db = args["--db"].asString();
-  const auto threads = args["--threads"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--threads"].asString().data()));
-  
+  // const std::uint16_t threads = args["--threads"].isLong() ? static_cast<std::uint16_t>(args["--threads"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--threads"].asString().data()));
+  const int threads = 5;
+
   chattere::Server server(port);
   server.SetProperty("threads", threads);
 

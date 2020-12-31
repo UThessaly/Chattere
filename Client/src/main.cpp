@@ -24,11 +24,13 @@ static constexpr char USAGE[] =
 
 int main(int argc, char const *argv[])
 {
-    auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, false, "Chattere Client 1.0");
+    // auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, false, "Chattere Client 1.0");
 
-    const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data()));
-    const auto host = args["HOST"].asString();
+    // const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data()));
+    // const auto host = args["HOST"].asString();
 
+    const auto port = 20080;
+    const std::string host = "0.0.0.0";
     chattere::net::Socket sock(chattere::net::InetSocketAddress(host, port));
 
     sock.Connect();

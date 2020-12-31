@@ -47,6 +47,7 @@ message Packet {
         // PingResponsePacket ping_response = 14;
         AuthRequestPacket signup_request = 15;
         ChatPacket chat = 16;
+        BasicChatEvent basic_chat_event = 17;
     }
 }
 
@@ -89,13 +90,20 @@ message PingResponsePacket {
     int64 time = 1;
 }
 
+message BasicChatEvent {
+    string message = 1;
+}
+
 message BasicChannel { 
     int64 id = 1;
 
+    reserved 'category_channel';
+    reserved 12;
+    
     oneof channel { 
         TextChannel text_channel = 10;
         DMChannel dm_channel = 11;
-        CategoryChannel category_channel = 12;
+        // CategoryChannel category_channel = 12;
     }
 }
 

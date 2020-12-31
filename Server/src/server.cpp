@@ -5,6 +5,14 @@
 #include <stdlib.h>
 #include "handlers.hpp"
 #include "emoji.hpp"
+#include "events/events.hpp"
+
+
+#include "user.hpp"
+#include "command_sender.hpp"
+#include "permissible.hpp"
+#include "channel.hpp"
+#include "console_command_sender.hpp"
 
 namespace chattere
 {
@@ -21,13 +29,15 @@ namespace chattere
         m_packet_handlers.Add(chattere::protocol::Packet::DataCase::kChat, chattere::handlers::serverbound::OnChat);
     }
 
-    void Server::AssingSocketToUser(std::int64_t client_id, std::int64_t user_id)
+    void Server::AssingSocketToUser(std::int64_t client_id, std::shared_ptr<User> user)
     {
-        m_socket_to_user.insert_or_assign(client_id, user_id);
+        m_socket_to_user.insert_or_assign(client_id, user);
     }
 
-    std::int64_t Server::UserFromClient(std::int64_t client_id)
+    std::shared_ptr<User> Server::UserFromClient(std::int64_t client_id)
     {
+        if (m_socket_to_user.count(client_id) == 0)
+            return nullptr;
         return m_socket_to_user.at(client_id);
     }
 
@@ -201,24 +211,18 @@ namespace chattere
 
         for (int i = 0; i < std::any_cast<int>(m_settings["threads"]) - 2; i++)
         {
+            const auto id = CreateSnowflake();
             m_futures.push_back(std::async(std::launch::async, [&]() {
-                auto id = i;
                 while (true)
                 {
+                    std::lock_guard<std::mutex> guard(m_unprocessed_packet_mutex);
+                    if (m_unprocessed_packets.size() > 0)
                     {
-                        std::lock_guard<std::mutex> guard(m_unprocessed_packet_mutex);
-                        if (m_unprocessed_packets.size() > 0)
-                        {
-                            auto [client, packet] = m_unprocessed_packets[0];
-                            // client = _client;
-                            // packet = _packet;
-                            m_unprocessed_packets.pop_front();
+                        auto [client, packet] = m_unprocessed_packets[0];
+                        m_unprocessed_packets.pop_front();
 
-                            ProcessPacket(client, packet);
-                            spdlog::info("procesisng packet on threads {}", id);
-                        }
-                        else
-                            continue;
+                        ProcessPacket(client, packet);
+                        GetConsoleLogger()->debug("Processing Packet on thread {}", id);
                     }
                 }
             }));
@@ -235,7 +239,7 @@ namespace chattere
         // spdlog::info("Client {} is requesting to login with {} {}", client->GetId(), request.username(), request.password());
     }
 
-    std::uint16_t Server::GetPort()
+    std::uint16_t Server::GetPort() const
     {
         return m_port;
     }

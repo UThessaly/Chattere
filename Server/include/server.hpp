@@ -10,9 +10,12 @@
 #include <any>
 #include <deque>
 #include <future>
+#include "command_sender.hpp"
+#include "user.hpp"
 
 namespace chattere
 {
+    class User;
     class Server
     {
     public:
@@ -23,10 +26,10 @@ namespace chattere
 
         database::Database &GetDatabase();
 
-        void AssingSocketToUser(std::int64_t socket, std::int64_t user_Id);
-        std::int64_t UserFromClient(std::int64_t client_id);
+        void AssingSocketToUser(std::int64_t socket, std::shared_ptr<User> user);
+        std::shared_ptr<User> UserFromClient(std::int64_t client_id);
 
-        std::uint16_t GetPort();
+        std::uint16_t GetPort() const;
         std::mutex &GetGeneralMutex();
 
         void SetProperty(std::string property, std::any value);
@@ -51,6 +54,7 @@ namespace chattere
         database::Database m_database;
         std::uint16_t m_port;
         std::shared_ptr<spdlog::logger> m_console_logger;
-        std::map<std::int64_t, std::int64_t> m_socket_to_user;
+
+        std::map<std::int64_t, std::shared_ptr<User>> m_socket_to_user;
     };
 } // namespace chattere
