@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include "handlers.hpp"
 #include "emoji.hpp"
-#include "events/events.hpp"
-
 
 #include "user.hpp"
 #include "command_sender.hpp"
@@ -14,11 +12,15 @@
 #include "channel.hpp"
 #include "console_command_sender.hpp"
 
+#include "events.hpp"
+#include "server_events.hpp"
+
 namespace chattere
 {
     using chattere::net::ServerSocket;
     Server::Server(std::uint16_t port) : m_server(ServerSocket(port)),
-                                         m_database(database::Database("data.db3"))
+                                         m_database(database::Database("data.db3")),
+                                         m_event_handler(std::make_shared<ServerEventHandler>(this))
     {
         m_port = port;
         m_console_logger = spdlog::stdout_color_st("Server/Main");
@@ -27,6 +29,10 @@ namespace chattere
         m_packet_handlers.Add(chattere::protocol::Packet::DataCase::kAuthRequest, chattere::handlers::serverbound::OnAuthRequest);
         m_packet_handlers.Add(chattere::protocol::Packet::DataCase::kSignupRequest, chattere::handlers::serverbound::OnSignupRequest);
         m_packet_handlers.Add(chattere::protocol::Packet::DataCase::kChat, chattere::handlers::serverbound::OnChat);
+
+        std::shared_ptr basic_listeners = std::make_shared<BasicServerEventListener>();
+        auto listener_ptr = std::dynamic_pointer_cast<EventListener>(basic_listeners);
+        m_event_handler->RegisterEventListener(listener_ptr);
     }
 
     void Server::AssingSocketToUser(std::int64_t client_id, std::shared_ptr<User> user)
@@ -257,5 +263,10 @@ namespace chattere
     void Server::SetProperty(std::string property, std::any value)
     {
         m_settings[property] = value;
+    }
+
+    std::shared_ptr<ServerEventHandler> Server::GetEventHandlers()
+    {
+        return m_event_handler;
     }
 } // namespace chattere

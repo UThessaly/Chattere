@@ -12,6 +12,8 @@
 #include <future>
 #include "command_sender.hpp"
 #include "user.hpp"
+#include "events.hpp"
+#include "server_events.hpp"
 
 namespace chattere
 {
@@ -36,6 +38,8 @@ namespace chattere
 
         std::vector<std::future<void>> m_futures;
 
+        std::shared_ptr<ServerEventHandler> GetEventHandlers();
+
     private:
         std::mutex m_general_mutex;
         std::mutex m_unprocessed_packet_mutex;
@@ -56,5 +60,7 @@ namespace chattere
         std::shared_ptr<spdlog::logger> m_console_logger;
 
         std::map<std::int64_t, std::shared_ptr<User>> m_socket_to_user;
+
+        std::shared_ptr<ServerEventHandler> m_event_handler;
     };
 } // namespace chattere

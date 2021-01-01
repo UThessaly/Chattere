@@ -1,4 +1,4 @@
-add_executable(server src/server.cpp src/main.cpp src/events/events.cpp src/user.cpp src/command_sender.cpp src/console_command_sender.cpp)
+add_executable(server src/server.cpp src/main.cpp src/events/events.cpp src/user.cpp src/command_sender.cpp src/console_command_sender.cpp src/events/server_events.cpp)
 
 find_package(Threads REQUIRED)
 

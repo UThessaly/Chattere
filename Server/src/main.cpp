@@ -5,22 +5,26 @@
 #include "snowflake.hpp"
 #include <docopt/docopt.h>
 #include <cstdlib>
+#include <cmath>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
 static constexpr char USAGE[] =
-R"(Chattere Server
+    R"(Chattere Server
     Usage:
       server [options]
       server (-h | --help)
       server --version
 
     Options:
-      -h --help          Show this screen.
-      --version          Show version.
-      -p --port=<port>   Port to start the server on [default: 20080].
-      -d --db=<file>     Database path [default: ./database.db3].   
-      -t --threads=<num> How many threads to be used [default: 1].  
+      -h --help             Show this screen.
+      --version             Show version.
+      -p --port=<port>      Port to start the server on [default: 20080].
+      -d --db=<file>        Database path [default: ./database.db3].   
+      -t --threads=<num>    How many threads to be used [default: 1].  
+      -e -ethreads=<num>    If events (OnChat, OnConnection) should be
+                            Multithreaded. If the value is set to 0,
+                            then the events will not be multithreaded [default: 0].
 )";
 
 int main(int argc, char const *argv[])
@@ -31,7 +35,9 @@ int main(int argc, char const *argv[])
 
   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Chattere Server 1.0");
 
-  const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data())); 
+  const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data()));
+  // const auto event_threads = args["-e"].isLong() ? static_cast<std::uint16_t>(args["-e"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["-e"].asString().data()));
+
   const auto &db = args["--db"].asString();
   // const std::uint16_t threads = args["--threads"].isLong() ? static_cast<std::uint16_t>(args["--threads"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--threads"].asString().data()));
   const int threads = 5;
