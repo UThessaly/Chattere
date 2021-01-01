@@ -23,8 +23,6 @@ else()
     message(FATAL_ERROR "Conan was not initialized. Please initialize Conan with 'cd build && conan install ..'." "To install Conan, go to https://docs.conan.io/en/latest/installation.html")
 endif()
 
-
-
 find_package(Protobuf REQUIRED)
 include_directories(
     ${Protobuf_INCLUDE_DIRS}

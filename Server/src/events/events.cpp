@@ -27,10 +27,25 @@ namespace chattere
         m_is_canceled = true;
     }
 
-    UserChatEvent::UserChatEvent(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &message)
-        : BasicEvent(server, "OnUserChatEvent"),
-          m_user(user),
+    UserBasicEvent::UserBasicEvent(Server *server, const std::string &event_name, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client)
+        : BasicEvent(server, event_name),
           m_client(client),
+          m_user(user)
+    {
+    }
+
+    std::shared_ptr<User> UserBasicEvent::GetUser()
+    {
+        return m_user;
+    }
+
+    std::shared_ptr<net::ClientSocket> UserBasicEvent::GetClient()
+    {
+        return m_client;
+    }
+
+    UserChatEvent::UserChatEvent(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &message)
+        : UserBasicEvent(server, "OnUserChatEvent", user, client),
           m_message(message),
           m_format("<$0> $1")
     {
@@ -54,16 +69,6 @@ namespace chattere
     std::string &UserChatEvent::GetFormat()
     {
         return m_format;
-    }
-
-    std::shared_ptr<User> UserChatEvent::GetUser()
-    {
-        return m_user;
-    }
-
-    std::shared_ptr<net::ClientSocket> UserChatEvent::GetClient()
-    {
-        return m_client;
     }
 
     void EventListener::OnUserChatEvent(std::shared_ptr<UserChatEvent> event)

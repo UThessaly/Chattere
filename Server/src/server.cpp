@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "handlers.hpp"
 #include "emoji.hpp"
+#include <algorithm>
 
 #include "user.hpp"
 #include "command_sender.hpp"
@@ -14,6 +15,7 @@
 
 #include "events.hpp"
 #include "server_events.hpp"
+#include <fstream>
 
 namespace chattere
 {
@@ -22,6 +24,22 @@ namespace chattere
                                          m_database(database::Database("data.db3")),
                                          m_event_handler(std::make_shared<ServerEventHandler>(this))
     {
+        if (auto settings_file = std::fstream("settings.yaml"); !settings_file)
+        {
+            auto settings = CreateDefaultConfig();
+            m_config = settings;
+
+            YAML::Emitter emitter;
+            emitter << m_config;
+
+            auto write_settings = std::ofstream("settings.yaml");
+            write_settings << emitter.c_str() << std::endl;
+        }
+        else
+        {
+            m_config = YAML::Load(settings_file);
+        }
+
         m_port = port;
         m_console_logger = spdlog::stdout_color_st("Server/Main");
         m_console_logger->set_pattern("[%H:%M:%S %^%L%$] %v");
@@ -268,5 +286,93 @@ namespace chattere
     std::shared_ptr<ServerEventHandler> Server::GetEventHandlers()
     {
         return m_event_handler;
+    }
+
+    YAML::Node CreateColor(const std::string &name, const std::string &find, const std::string replace)
+    {
+        YAML::Node color;
+        color["name"] = name;
+        color["find"] = find;
+        color["replace"] = replace;
+
+        return color;
+    }
+
+    YAML::Node Server::CreateDefaultConfig() const
+    {
+        YAML::Node settings;
+
+        settings["chat_format"] = "$0: $1";
+
+        settings["colors"].push_back(CreateColor("black", "&1", "\u001b[30m"));
+        settings["colors"].push_back(CreateColor("red", "&2", "\u001b[31m"));
+        settings["colors"].push_back(CreateColor("green", "&3", "\u001b[32m"));
+        settings["colors"].push_back(CreateColor("yellow", "&4", "\u001b[33m"));
+        settings["colors"].push_back(CreateColor("blue", "&5", "\u001b[34m"));
+        settings["colors"].push_back(CreateColor("magenta", "&6", "\u001b[35m"));
+        settings["colors"].push_back(CreateColor("cyan", "&7", "\u001b[36m"));
+        settings["colors"].push_back(CreateColor("white", "&8", "\u001b[37m"));
+
+        settings["colors"].push_back(CreateColor("bright_black", "&9", "\u001b[30;1m"));
+        settings["colors"].push_back(CreateColor("bright_red", "&0", "\u001b[31;1m"));
+        settings["colors"].push_back(CreateColor("bright_green", "&a", "\u001b[32;1m"));
+        settings["colors"].push_back(CreateColor("bright_yellow", "&c", "\u001b[33;1m"));
+        settings["colors"].push_back(CreateColor("bright_blue", "&d", "\u001b[34;1m"));
+        settings["colors"].push_back(CreateColor("bright_magenta", "&e", "\u001b[35;1m"));
+        settings["colors"].push_back(CreateColor("bright_cyan", "&g", "\u001b[36;1m"));
+        settings["colors"].push_back(CreateColor("bright_white", "&f", "\u001b[37;1m"));
+
+        settings["colors"].push_back(CreateColor("bg_black", "#1", "\u001b[40m"));
+        settings["colors"].push_back(CreateColor("bg_red", "#2", "\u001b[41m"));
+        settings["colors"].push_back(CreateColor("bg_green", "#3", "\u001b[42m"));
+        settings["colors"].push_back(CreateColor("bg_yellow", "#4", "\u001b[43m"));
+        settings["colors"].push_back(CreateColor("bg_blue", "#5", "\u001b[44m"));
+        settings["colors"].push_back(CreateColor("bg_magenta", "#6", "\u001b[45m"));
+        settings["colors"].push_back(CreateColor("bg_cyan", "#7", "\u001b[46m"));
+        settings["colors"].push_back(CreateColor("bg_white", "#8", "\u001b[47m"));
+
+        settings["colors"].push_back(CreateColor("bg_bright_black", "#9", "\u001b[40;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_red", "#0", "\u001b[41;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_green", "#a", "\u001b[42;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_yellow", "#c", "\u001b[43;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_blue", "#e", "\u001b[44;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_magenta", "#e", "\u001b[45;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_cyan", "#g", "\u001b[46;1m"));
+        settings["colors"].push_back(CreateColor("bg_bright_white", "#f", "\u001b[47;1m"));
+
+        settings["colors"].push_back(CreateColor("bold", "$b", "\u001b[1m"));
+        settings["colors"].push_back(CreateColor("underline", "$u", "\u001b[4m"));
+        settings["colors"].push_back(CreateColor("reversed", "$v", "\u001b[7m"));
+
+        settings["colors"].push_back(CreateColor("reset", "$r", "\u001b[0m"));
+        settings["colors"].push_back(CreateColor("reset", "#r", "\u001b[0m"));
+        settings["colors"].push_back(CreateColor("reset", "&r", "\u001b[0m"));
+
+        const std::string &ColorFormat(const std::string &message);
+        return settings;
+    }
+
+    YAML::Node &Server::GetConfig()
+    {
+        return m_config;
+    }
+
+    const std::string Server::ColorFormat(const std::string &message) const
+    {
+        std::string result = message;
+        for (auto &color : m_config["colors"])
+        {
+            auto to_replace = color["find"].as<std::string>();
+            auto replace = color["replace"].as<std::string>();
+
+            std::size_t start_pos = 0;
+            while ((start_pos = result.find(to_replace, start_pos)) != std::string::npos)
+            {
+                result.replace(start_pos, 2, replace);
+                start_pos += replace.length();
+            }
+        }
+
+        return result;
     }
 } // namespace chattere

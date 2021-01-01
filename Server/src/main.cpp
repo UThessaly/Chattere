@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <yaml-cpp/yaml.h>
 
 static constexpr char USAGE[] =
     R"(Chattere Server
@@ -29,6 +30,29 @@ static constexpr char USAGE[] =
 
 int main(int argc, char const *argv[])
 {
+  // YAML::Node node;
+  // node["hello"] = "world";
+
+  // YAML::Node node2;
+  // node2["one"] = "hello";
+  // node2["two"].push_back("one");
+  // node2["two"].push_back("two");
+  // node2["two"].push_back("three");
+  // node2["1"].push_back(1);
+  // node2["1"].push_back(2);
+  // node2["1"].push_back(3);
+
+  // node["a.b.c.d"] = 1;
+  // node["a"]["b"]["c"]["d"] = 1;
+
+  // node["settings"] = node2;
+
+  // node["hi"] = {{"one", 1}, {"two", 2}};
+
+  // YAML::Emitter e;
+  // e << node;
+  // std::cout << e.c_str() << std::endl;
+  // return 0;
   // auto e = std::dynamic_pointer_cast<BasicEvent>(event);
 
   // e->GetName();
@@ -45,7 +69,11 @@ int main(int argc, char const *argv[])
   chattere::Server server(port);
   server.SetProperty("threads", threads);
 
+  spdlog::info("{}", server.ColorFormat("$b&cHello&r #a&dworld &r"));
+
   server.GetConsoleLogger()->info("    {}  Server started on port {}", chattere::EMOJIS["smile"], port);
+  return 0;
+
   server.Listen();
 
   for(auto& future : server.m_futures) {

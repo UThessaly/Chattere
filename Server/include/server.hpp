@@ -14,6 +14,7 @@
 #include "user.hpp"
 #include "events.hpp"
 #include "server_events.hpp"
+#include <yaml-cpp/yaml.h>
 
 namespace chattere
 {
@@ -40,7 +41,14 @@ namespace chattere
 
         std::shared_ptr<ServerEventHandler> GetEventHandlers();
 
+        const std::string ColorFormat(const std::string &message) const;
+
+        YAML::Node &GetConfig();
+
     private:
+        YAML::Node CreateDefaultConfig() const;
+
+        YAML::Node m_config;
         std::mutex m_general_mutex;
         std::mutex m_unprocessed_packet_mutex;
         std::deque<std::tuple<std::shared_ptr<net::ClientSocket>, std::shared_ptr<protocol::Packet>>> m_unprocessed_packets;
