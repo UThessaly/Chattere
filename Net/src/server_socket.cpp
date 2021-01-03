@@ -66,11 +66,13 @@ namespace chattere::net
         if (client_socketFd < 0)
         {
             spdlog::error("Connection Error with client {} with error: ", id, strerror(errno));
+            return nullptr;
         }
 
         if (fcntl(client_socketFd, F_SETFL, fcntl(client_socketFd, F_GETFL) | O_NONBLOCK) < 0)
         {
             spdlog::error("Error setting Socket to be NonBlocking for client {}", id);
+            return nullptr;
         }
 
         InetSocketAddress addr(cli_addr);
@@ -78,16 +80,6 @@ namespace chattere::net
         auto socket = std::make_shared<Socket>(addr, client_socketFd);
         auto client = std::make_shared<ClientSocket>(id, socket);
 
-        // client->m_socket->OnData([&](std::size_t size, std::vector<std::uint8_t> buffer) {
-        //     // Reaching a Deadlock, not sure why. Removing the mutex from here
-        //     // Just because I can't figure it out why.
-        //     // There is a VERY SLIM chance that the program will completely break
-        //     // Just restart it when and if it even does
-        //     // {
-        //         // std::lock_guard<std::mutex> guard(client->m_mutex);
-        //         client->m_read_buffer.insert(client->m_read_buffer.end(), buffer.begin(), buffer.begin() + size);
-        //     // }
-        // });
         m_clients.insert_or_assign(id, client);
 
         return client;

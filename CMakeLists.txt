@@ -38,6 +38,7 @@ add_subdirectory(Events)
 add_subdirectory(Database)
 add_subdirectory(Snowflakes)
 add_subdirectory(Server)
+add_subdirectory(Plugins)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

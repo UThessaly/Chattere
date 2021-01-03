@@ -13,9 +13,9 @@
 static constexpr char USAGE[] =
     R"(Chattere Server
     Usage:
-      server [options]
-      server (-h | --help)
-      server --version
+      chattere_server [options]
+      chattere_server (-h | --help)
+      chattere_server --version
 
     Options:
       -h --help             Show this screen.
@@ -28,19 +28,27 @@ static constexpr char USAGE[] =
                             then the events will not be multithreaded [default: 0].
 )";
 
+#include <sol/sol.hpp>
+#include "plugins.hpp"
+#include "packet.hpp"
+
 int main(int argc, char const *argv[])
 {
+  using namespace chattere::plugins;
+  // Plugin plugin("Example Plugin");
+
+  // return 0;
   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Chattere Server 1.0");
 
   const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data()));
   const auto event_threads = args["-e"].isLong() ? static_cast<std::uint16_t>(args["--ethreads"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--ethreads"].asString().data()));
 
   const auto &db = args["--db"].asString();
-  const auto threads = args["--threads"].isLong() ? static_cast<std::uint16_t>(args["--threads"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--threads"].asString().data()));
-  // const int threads = 5;
+  const auto threads = args["--threads"].isLong() ? static_cast<int>(args["--threads"].asLong()) : static_cast<int>(std::atoi(args["--threads"].asString().data()));
 
   chattere::Server server(port);
-  server.SetProperty("threads", threads);
+
+  server.SetProperty("threads", threads); 
   
   server.GetConsoleLogger()->info("    {}  Server started on port {}", chattere::EMOJIS["smile"], port);
 

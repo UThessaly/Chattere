@@ -12,6 +12,7 @@ namespace chattere
 
         void RegisterEventListener(std::shared_ptr<EventListener> listener);
         void EmitUserChatEvent(std::shared_ptr<net::ClientSocket> client, std::shared_ptr<User> user, std::string &message);
+        void EmitUserCommandEvent(std::shared_ptr<net::ClientSocket> client, std::shared_ptr<User> user, std::string &message);
 
     private:
         friend Server;

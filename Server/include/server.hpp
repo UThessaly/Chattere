@@ -15,6 +15,7 @@
 #include "events.hpp"
 #include "server_events.hpp"
 #include <yaml-cpp/yaml.h>
+#include "command.hpp"
 
 namespace chattere
 {
@@ -45,6 +46,9 @@ namespace chattere
 
         YAML::Node &GetConfig();
 
+        void RegisterCommandExecutor(const std::string &command, const CommandExecutor &executor);
+        const CommandExecutor &GetCommandExecutor(const std::string &command) const;
+
     private:
         YAML::Node CreateDefaultConfig() const;
 
@@ -70,5 +74,7 @@ namespace chattere
         std::map<std::int64_t, std::shared_ptr<User>> m_socket_to_user;
 
         std::shared_ptr<ServerEventHandler> m_event_handler;
+
+        std::map<std::string, CommandExecutor> m_commands;
     };
 } // namespace chattere

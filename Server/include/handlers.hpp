@@ -87,7 +87,12 @@ namespace chattere::handlers::serverbound
 
         auto chat_message = packet->chat();
         auto content = chat_message.content();
-        server->GetConsoleLogger()->info(R"(    {}  {}: {})", chattere::EMOJIS["speech_balloon"], user->GetId(), chat_message.content());
-        server->GetEventHandlers()->EmitUserChatEvent(client, user, content);
+        if (content.starts_with("/"))
+        {
+        }
+        else
+        {
+            server->GetEventHandlers()->EmitUserChatEvent(client, user, content);
+        }
     };
 } // namespace chattere::handlers::serverbound

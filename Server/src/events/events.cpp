@@ -1,4 +1,8 @@
 #include "events.hpp"
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <algorithm>
+#include <numeric>
 
 namespace chattere
 {
@@ -73,6 +77,56 @@ namespace chattere
 
     void EventListener::OnUserChatEvent(std::shared_ptr<UserChatEvent> event)
     {
+    }
+
+    OnUserCommand::OnUserCommand(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &command_message)
+        : UserBasicEvent(server, "OnUserCommand", user, client)
+    {
+        SetCommandMessage(command_message);
+    }
+
+    void OnUserCommand::SetCommandMessage(const std::string &message)
+    {
+        std::vector<std::string> args;
+        boost::split(args, message, boost::is_any_of(" "), boost::token_compress_on);
+
+        m_command = args[0];
+        m_args = args;
+    }
+
+    void OnUserCommand::SetCommand(const std::string &command)
+    {
+        m_command = command;
+        m_args[0] = command;
+    }
+
+    void OnUserCommand::SetCommandArgs(const std::vector<std::string> &args)
+    {
+        m_args = args;
+        m_command = args[0];
+    }
+
+    const std::string &OnUserCommand::GetCommand()
+    {
+        return m_command;
+    }
+
+    const std::vector<std::string> &OnUserCommand::GetArgsArray()
+    {
+        return m_args;
+    }
+
+    const std::string OnUserCommand::GetFullCommand()
+    {
+        std::string result;
+
+        for (const auto &arg : result)
+        {
+            result += arg + ' ';
+        }
+
+        result.resize(result.size() - 1);
+        return std::move(result);
     }
 
 } // namespace chattere

@@ -2,6 +2,7 @@
 
 #include "actions.hpp"
 #include "client_socket.hpp"
+#include "command.hpp"
 
 namespace chattere
 {
@@ -51,16 +52,27 @@ namespace chattere
         std::string m_format;
     };
 
-    class OnUserCommand : public BasicEvent
+    class OnUserCommand : public UserBasicEvent
     {
     public:
         OnUserCommand(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &command_message);
 
-        void SetCommandMessage(std::string &command_message);
-        void SetCommandArgs(std::string &args);
-        void SetCommandArgs(std::vector<std::string> &args);
+        void SetCommandMessage(const std::string &command_message);
+        // void SetCommandArgs(std::string &args);
+        void SetCommandArgs(const std::vector<std::string> &args);
+        void SetCommand(const std::string &command);
+        void SetCommandExecutor(CommandExecutor &executor);
 
-        void SetCommand(std::string &command);
+        const std::string &GetCommand();
+        // const std::string &GetArgs();
+        const std::vector<std::string> &GetArgsArray();
+        const std::string GetFullCommand();
+        const CommandExecutor &GetCommandExecutor();
+
+    private:
+        std::string m_command;
+        std::vector<std::string> m_args;
+        CommandExecutor m_executor;
     };
 
     class EventListener

@@ -188,15 +188,6 @@ namespace chattere
             }
         }));
 
-        // Merged this block of code with the thread above, so Accept() and Recv() are on the same thread
-        // m_futures.push_back(std::async(std::launch::async, [&]() {
-        //     while (true)
-        //     {
-        //         m_server.ClientsRecv();
-        //         spdlog::info("test");
-        //     }
-        // }));
-
         m_futures.push_back(std::async(std::launch::async, [&]() {
             std::vector<std::uint8_t> packet_buffer;
             while (true)
@@ -267,7 +258,7 @@ namespace chattere
     {
         return m_port;
     }
-
+ 
     database::Database &Server::GetDatabase()
     {
         return m_database;
@@ -374,5 +365,15 @@ namespace chattere
         }
 
         return result;
+    }
+
+    void Server::RegisterCommandExecutor(const std::string &command, const CommandExecutor &executor)
+    {
+        m_commands[command] = executor;
+    }
+
+    const CommandExecutor &Server::GetCommandExecutor(const std::string &command) const
+    {
+        return m_commands.at(command);
     }
 } // namespace chattere

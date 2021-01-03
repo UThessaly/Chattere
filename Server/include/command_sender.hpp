@@ -10,6 +10,10 @@ namespace chattere
     class Server;
     class Permissible;
     class User;
+
+    /**
+     * @brief The CommandSender base class 
+     */
     class CommandSender
     {
     public:
