@@ -1,0 +1,10 @@
+--- Makefile	2021-01-11 20:35:34.830000000 +0200
++++ "Makefile copy"	2021-01-11 20:35:31.400000000 +0200
+@@ -58,6 +58,7 @@
+ $(LUA_A): $(BASE_O)
+ 	$(AR) $@ $(BASE_O)
+ 	$(RANLIB) $@
++	$(CC) -shared -ldl -Wl,-soname,liblua.so -o liblua.so $? -lm $(MYLDFLAGS)
+ 
+ $(LUA_T): $(LUA_O) $(LUA_A)
+ 	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
