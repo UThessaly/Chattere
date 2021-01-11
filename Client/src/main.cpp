@@ -22,6 +22,8 @@ static constexpr char USAGE[] =
       -p --port=<port>   Remote Port [default: 20080].
 )";
 
+#include <algorithm>
+
 int main(int argc, char const *argv[])
 {
     // auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, false, "Chattere Client 1.0");

@@ -9,6 +9,7 @@
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <yaml-cpp/yaml.h>
+#include <filesystem>
 
 static constexpr char USAGE[] =
     R"(Chattere Server
@@ -26,18 +27,19 @@ static constexpr char USAGE[] =
       -e --ethreads=<num>   If events (OnChat, OnConnection) should be
                             Multithreaded. If the value is set to 0,
                             then the events will not be multithreaded [default: 0].
+      -l --libs=<dir>       Lua Libraries Directory [default: ./libs].
+      -pl --plugins=<dir>   Lua Plugins to Load [default: ./plugins].
+      --data=<dir>          Lua Plugin Data directory [default: ./plugins/data]
+      
 )";
 
 #include <sol/sol.hpp>
 #include "plugins.hpp"
 #include "packet.hpp"
+#include <spdlog/spdlog.h>
 
 int main(int argc, char const *argv[])
 {
-  using namespace chattere::plugins;
-  // Plugin plugin("Example Plugin");
-
-  // return 0;
   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Chattere Server 1.0");
 
   const auto port = args["--port"].isLong() ? static_cast<std::uint16_t>(args["--port"].asLong()) : static_cast<std::uint16_t>(std::atoi(args["--port"].asString().data()));
@@ -48,14 +50,25 @@ int main(int argc, char const *argv[])
 
   chattere::Server server(port);
 
-  server.SetProperty("threads", threads); 
-  
+  auto &lua = server.GetPluginManager().GetLua();
+
+  auto lua_libs = args["--libs"].asString();
+  auto lua_plugins = args["--plugins"].asString();
+  auto lua_plugins_data = args["--data"].asString();
+
+  server.GetPluginManager().SetPluginDataPath(lua_plugins_data);
+  server.GetPluginManager().LoadLibs(lua_libs);
+  server.GetPluginManager().LoadPlugins(lua_plugins);
+
+  server.SetProperty("threads", threads);
+
   server.GetConsoleLogger()->info("    {}  Server started on port {}", chattere::EMOJIS["smile"], port);
 
   server.Listen();
 
-  for(auto& future : server.m_futures) {
+  for (auto &future : server.m_futures)
+  {
     future.wait();
   }
-  return 0;
+  return 1;
 }

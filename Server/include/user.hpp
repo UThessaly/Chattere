@@ -17,6 +17,7 @@ namespace chattere
         const std::string GetName() const;
         Server *GetServer() const;
         bool IsUser() const;
+        bool IsConsole() const;
         void SendMessage(const std::string &message);
 
         void AddClientSocket(std::shared_ptr<net::ClientSocket> client);

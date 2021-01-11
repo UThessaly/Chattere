@@ -1,4 +1,4 @@
-add_library(Server STATIC src/server.cpp src/events/events.cpp src/user.cpp src/command_sender.cpp src/console_command_sender.cpp src/events/server_events.cpp)
+add_library(Server STATIC src/server.cpp src/user_command_sender.cpp src/events/events.cpp src/user.cpp src/command_sender.cpp src/events/server_events.cpp)
 add_executable(chattere_server src/main.cpp)
 
 find_package(Threads REQUIRED)

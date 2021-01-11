@@ -11,7 +11,6 @@
 #include "command_sender.hpp"
 #include "permissible.hpp"
 #include "channel.hpp"
-#include "console_command_sender.hpp"
 
 #include "events.hpp"
 #include "server_events.hpp"
@@ -22,7 +21,8 @@ namespace chattere
     using chattere::net::ServerSocket;
     Server::Server(std::uint16_t port) : m_server(ServerSocket(port)),
                                          m_database(database::Database("data.db3")),
-                                         m_event_handler(std::make_shared<ServerEventHandler>(this))
+                                         m_event_handler(std::make_shared<ServerEventHandler>(this)),
+                                         m_plugin_manager(this)
     {
         if (auto settings_file = std::fstream("settings.yaml"); !settings_file)
         {
@@ -367,13 +367,23 @@ namespace chattere
         return result;
     }
 
-    void Server::RegisterCommandExecutor(const std::string &command, const CommandExecutor &executor)
+    // const CommandExecutor &Server::GetCommandExecutor(const std::string &command) const
+    // {
+    //     return m_commands.at(command);
+    // }
+
+    plugins::PluginManager &Server::GetPluginManager()
     {
-        m_commands[command] = executor;
+        return m_plugin_manager;
+    }
+
+    void Server::RegisterCommand(const std::string &command, const CommandExecutor &executor)
+    {
+        m_commands.insert_or_assign(command, executor);
     }
 
     const CommandExecutor &Server::GetCommandExecutor(const std::string &command) const
     {
-        return m_commands.at(command);
+            return m_commands.at(command);
     }
 } // namespace chattere

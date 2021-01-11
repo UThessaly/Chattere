@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "permissible.hpp"
+#include "client_socket.hpp"
 
 namespace chattere
 {
@@ -17,6 +18,7 @@ namespace chattere
     class CommandSender
     {
     public:
+        // CommandSender(Server *server, std::shared_ptr<net::ClientSocket> client, std::shared_ptr<User> user);
         /**
          * @brief Get the Name of thje Command Sender
          * 
@@ -43,11 +45,19 @@ namespace chattere
          * 
          * @param messages 
          */
-        virtual void SendMessage(const std::vector<std::string> &messages) const;
+        // virtual void SendMessage(const std::vector<std::string> &messages) const;
         // virtual void SendMessage(const std::int64_t sender, const std::string &message) const;
         // virtual void SendMessage(const std::int64_t sender, const std::vector<std::string> &messages) const;
 
+        // std::shared_ptr<User> GetUser() const;
+        // std::shared_ptr<net::ClientSocket> GetClient() const;
+
         virtual bool IsUser() const;
         virtual bool IsConsole() const;
+
+    private:
+        std::shared_ptr<net::ClientSocket> m_client;
+        std::shared_ptr<User> m_user;
+        Server *server;
     };
 } // namespace chattere

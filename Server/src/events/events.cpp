@@ -3,6 +3,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <algorithm>
 #include <numeric>
+#include <spdlog/spdlog.h>
 
 namespace chattere
 {
@@ -55,12 +56,12 @@ namespace chattere
     {
     }
 
-    void UserChatEvent::SetMessage(std::string &message)
+    void UserChatEvent::SetMessage(const std::string &message)
     {
         m_message = message;
     }
 
-    void UserChatEvent::SetFormat(std::string &format)
+    void UserChatEvent::SetFormat(const std::string &format)
     {
         m_format = format;
     }
@@ -79,13 +80,18 @@ namespace chattere
     {
     }
 
-    OnUserCommand::OnUserCommand(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &command_message)
-        : UserBasicEvent(server, "OnUserCommand", user, client)
+    void EventListener::OnCommandEvent(std::shared_ptr<CommandEvent> event)
+    {
+    }
+
+    CommandEvent::CommandEvent(Server *server, std::shared_ptr<CommandSender> sender, std::string &command_message)
+        // : UserBasicEvent(server, "OnUserCommand", user, client)
+        : m_sender(sender), BasicEvent(server, "OnCommand")
     {
         SetCommandMessage(command_message);
     }
 
-    void OnUserCommand::SetCommandMessage(const std::string &message)
+    void CommandEvent::SetCommandMessage(const std::string &message)
     {
         std::vector<std::string> args;
         boost::split(args, message, boost::is_any_of(" "), boost::token_compress_on);
@@ -94,33 +100,48 @@ namespace chattere
         m_args = args;
     }
 
-    void OnUserCommand::SetCommand(const std::string &command)
+    void CommandEvent::SetCommand(const std::string &command)
     {
         m_command = command;
         m_args[0] = command;
     }
 
-    void OnUserCommand::SetCommandArgs(const std::vector<std::string> &args)
+    void CommandEvent::SetCommandArgs(const std::vector<std::string> &args)
     {
         m_args = args;
         m_command = args[0];
     }
 
-    const std::string &OnUserCommand::GetCommand()
+    void CommandEvent::SetCommandExecutor(const CommandExecutor &executor)
+    {
+        m_executor = executor;
+    }
+
+    const CommandExecutor &CommandEvent::GetCommandExecutor()
+    {
+        return m_executor;
+    }
+
+    std::shared_ptr<CommandSender> CommandEvent::GetCommandSender()
+    {
+        return m_sender;
+    }
+
+    const std::string &CommandEvent::GetCommand()
     {
         return m_command;
     }
 
-    const std::vector<std::string> &OnUserCommand::GetArgsArray()
+    const std::vector<std::string> &CommandEvent::GetArgsArray()
     {
         return m_args;
     }
 
-    const std::string OnUserCommand::GetFullCommand()
+    const std::string CommandEvent::GetFullCommand()
     {
         std::string result;
 
-        for (const auto &arg : result)
+        for (const auto &arg : m_args)
         {
             result += arg + ' ';
         }

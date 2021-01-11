@@ -16,9 +16,17 @@
 #include "server_events.hpp"
 #include <yaml-cpp/yaml.h>
 #include "command.hpp"
+#include "plugins.hpp"
+#include <variant>
+#include "command.hpp"
 
 namespace chattere
 {
+    namespace plugins
+    {
+        class PluginManager;
+    }
+
     class User;
     class Server
     {
@@ -46,11 +54,19 @@ namespace chattere
 
         YAML::Node &GetConfig();
 
-        void RegisterCommandExecutor(const std::string &command, const CommandExecutor &executor);
+        // void RegisterCommandExecutor(const std::string &command, const CommandExecutor &executor);
+
+        plugins::PluginManager &GetPluginManager();
+
+        void RegisterCommand(const std::string &command, const CommandExecutor &executor);
         const CommandExecutor &GetCommandExecutor(const std::string &command) const;
 
     private:
         YAML::Node CreateDefaultConfig() const;
+
+        std::map<std::string, CommandExecutor> m_commands;
+
+        plugins::PluginManager m_plugin_manager;
 
         YAML::Node m_config;
         std::mutex m_general_mutex;
@@ -74,7 +90,5 @@ namespace chattere
         std::map<std::int64_t, std::shared_ptr<User>> m_socket_to_user;
 
         std::shared_ptr<ServerEventHandler> m_event_handler;
-
-        std::map<std::string, CommandExecutor> m_commands;
     };
 } // namespace chattere

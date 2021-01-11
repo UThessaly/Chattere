@@ -3,6 +3,7 @@
 #include "actions.hpp"
 #include "client_socket.hpp"
 #include "command.hpp"
+#include "command_sender.hpp"
 
 namespace chattere
 {
@@ -42,29 +43,29 @@ namespace chattere
     public:
         UserChatEvent(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &message);
 
-        void SetMessage(std::string &message);
+        void SetMessage(const std::string &message);
         std::string &GetMessage();
         std::string &GetFormat();
-        void SetFormat(std::string &format);
+        void SetFormat(const std::string &format);
 
     private:
         std::string m_message;
         std::string m_format;
     };
 
-    class OnUserCommand : public UserBasicEvent
+    class CommandEvent : public BasicEvent
     {
     public:
-        OnUserCommand(Server *server, std::shared_ptr<User> user, std::shared_ptr<net::ClientSocket> client, std::string &command_message);
+        CommandEvent(Server *server, std::shared_ptr<CommandSender> sender, std::string &command_message);
 
         void SetCommandMessage(const std::string &command_message);
         // void SetCommandArgs(std::string &args);
         void SetCommandArgs(const std::vector<std::string> &args);
         void SetCommand(const std::string &command);
-        void SetCommandExecutor(CommandExecutor &executor);
+        void SetCommandExecutor(const CommandExecutor &executor);
 
+        std::shared_ptr<CommandSender> GetCommandSender();
         const std::string &GetCommand();
-        // const std::string &GetArgs();
         const std::vector<std::string> &GetArgsArray();
         const std::string GetFullCommand();
         const CommandExecutor &GetCommandExecutor();
@@ -73,12 +74,14 @@ namespace chattere
         std::string m_command;
         std::vector<std::string> m_args;
         CommandExecutor m_executor;
+        std::shared_ptr<CommandSender> m_sender;
     };
 
     class EventListener
     {
     public:
         virtual void OnUserChatEvent(std::shared_ptr<UserChatEvent> event);
+        virtual void OnCommandEvent(std::shared_ptr<CommandEvent> event);
     };
 
 } // namespace chattere

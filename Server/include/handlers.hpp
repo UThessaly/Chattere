@@ -2,6 +2,8 @@
 #include "packet.hpp"
 #include "emoji.hpp"
 #include "snowflake.hpp"
+#include "command_sender.hpp"
+#include "user_command_sender.hpp"
 
 namespace chattere::handlers::serverbound
 {
@@ -89,6 +91,8 @@ namespace chattere::handlers::serverbound
         auto content = chat_message.content();
         if (content.starts_with("/"))
         {
+            // std::make_shared<CommandSender>(server, client, user);
+            server->GetEventHandlers()->EmitCommandEvent(user, content);
         }
         else
         {

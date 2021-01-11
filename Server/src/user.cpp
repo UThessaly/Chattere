@@ -38,6 +38,11 @@ namespace chattere
         return true;
     }
 
+    bool User::IsConsole() const
+    {
+        return false;
+    }
+
     const std::string User::GetName() const
     {
         return m_user->username();

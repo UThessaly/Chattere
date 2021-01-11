@@ -3,13 +3,16 @@
 
 namespace chattere
 {
-    // CommandSender::CommandSender() {}
+    //  CommandSender::CommandSender(Server *server, std::shared_ptr<net::ClientSocket> client, std::shared_ptr<User> user) { 
 
-    void CommandSender::SendMessage(const std::vector<std::string> &messages) const
-    {
-        for (const auto &message : messages)
-            SendMessage(message);
-    }
+    //  }
+       
+
+    // void CommandSender::SendMessage(const std::vector<std::string> &messages) const
+    // {
+    //     for (const auto &message : messages)
+    //         SendMessage(message);
+    // }
 
     void CommandSender::SendMessage(const std::string &message) const
     {
@@ -23,7 +26,7 @@ namespace chattere
 
     const std::string CommandSender::GetName() const
     {
-        return "Unknwon Command Sender";
+        return "hi";
     }
 
     bool CommandSender::IsUser() const
@@ -35,5 +38,13 @@ namespace chattere
     {
         return false;
     }
+
+    // std::shared_ptr<User> CommandSender::GetUser() const {
+    //     return m_user;
+    // }
+
+    // std::shared_ptr<net::ClientSocket> CommandSender::GetClient() const {
+    //     return m_client;
+    // }
 
 } // namespace chattere
